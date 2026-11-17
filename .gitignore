@@ -1,0 +1,15 @@
+# Secrets et certificats : ne jamais publier
+lab/.env
+*.crt
+*.key
+*.pem
+ca.zip
+certs.zip
+
+# Jeux de données téléchargés (volumineux, disponibles à la source)
+datasets/
+
+# Python
+__pycache__/
+*.pyc
+.venv/

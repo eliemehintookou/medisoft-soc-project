@@ -1,0 +1,126 @@
+# ============================================================================
+#  SOC MediSoft — Plateforme SIEM (Elasticsearch + Kibana / Elastic Security)
+#  Déploiement mono-nœud pour lab, sécurisé (authentification + TLS)
+#  Référence : MS-SOC-SPD-01 (spécification détaillée de la plateforme)
+# ============================================================================
+
+services:
+
+  # --------------------------------------------------------------------------
+  # 1. setup : conteneur éphémère qui
+  #    - génère une autorité de certification (CA) et le certificat de es01
+  #    - attend qu'Elasticsearch démarre
+  #    - définit le mot de passe du compte technique kibana_system
+  # --------------------------------------------------------------------------
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+    user: "0"
+    command: >
+      bash -c '
+        if [ x${ELASTIC_PASSWORD} == x ]; then
+          echo "ERREUR : ELASTIC_PASSWORD vide dans le fichier .env";
+          exit 1;
+        elif [ x${KIBANA_PASSWORD} == x ]; then
+          echo "ERREUR : KIBANA_PASSWORD vide dans le fichier .env";
+          exit 1;
+        fi;
+        if [ ! -f config/certs/ca.zip ]; then
+          echo "Création de la CA";
+          bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
+          unzip config/certs/ca.zip -d config/certs;
+        fi;
+        if [ ! -f config/certs/certs.zip ]; then
+          echo "Création du certificat de es01";
+          echo -ne "instances:\n  - name: es01\n    dns:\n      - es01\n      - localhost\n    ip:\n      - 127.0.0.1\n" > config/certs/instances.yml;
+          bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
+          unzip config/certs/certs.zip -d config/certs;
+        fi;
+        chown -R root:root config/certs;
+        find config/certs -type d -exec chmod 750 \{\} \;;
+        find config/certs -type f -exec chmod 640 \{\} \;;
+        echo "Attente du démarrage d Elasticsearch";
+        until curl -s --cacert config/certs/ca/ca.crt https://es01:9200 | grep -q "missing authentication credentials"; do sleep 10; done;
+        echo "Définition du mot de passe kibana_system";
+        until curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:${ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://es01:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "Setup terminé";
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f config/certs/es01/es01.crt ]"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+
+  # --------------------------------------------------------------------------
+  # 2. es01 : Elasticsearch (stockage, indexation, recherche des journaux)
+  # --------------------------------------------------------------------------
+  es01:
+    depends_on:
+      setup:
+        condition: service_healthy
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: soc-es01
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+      - esdata01:/usr/share/elasticsearch/data
+    ports:
+      # Exposé uniquement en local (127.0.0.1) : jamais sur le réseau
+      - "127.0.0.1:${ES_PORT}:9200"
+    environment:
+      - node.name=es01
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=certs/es01/es01.key
+      - xpack.security.http.ssl.certificate=certs/es01/es01.crt
+      - xpack.security.http.ssl.certificate_authorities=certs/ca/ca.crt
+      - xpack.license.self_generated.type=basic
+      # Mémoire Java limitée pour un PC modeste (voir INSTALLATION.md)
+      - ES_JAVA_OPTS=-Xms${ES_HEAP} -Xmx${ES_HEAP}
+    mem_limit: ${ES_MEM_LIMIT}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'"]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  # --------------------------------------------------------------------------
+  # 3. kibana : interface web (Elastic Security : alertes, règles, cas,
+  #    exceptions, tableaux de bord)
+  # --------------------------------------------------------------------------
+  kibana:
+    depends_on:
+      es01:
+        condition: service_healthy
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    container_name: soc-kibana
+    volumes:
+      - certs:/usr/share/kibana/config/certs
+      - kibanadata:/usr/share/kibana/data
+    ports:
+      - "127.0.0.1:${KIBANA_PORT}:5601"
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=https://es01:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+      # Clés de chiffrement obligatoires pour le moteur de détection,
+      # les règles d'alerte et les cas d'Elastic Security
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+      - XPACK_SECURITY_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+      - XPACK_REPORTING_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+    mem_limit: ${KIBANA_MEM_LIMIT}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'"]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+volumes:
+  certs:
+  esdata01:
+  kibanadata:
