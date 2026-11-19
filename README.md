@@ -33,8 +33,8 @@ C'est la suite de mon [projet GRC MediSoft](https://github.com/eliemehintookou/m
 
 | Module | Sujet | Statut |
 |---|---|---|
-| [1](module1/) | **Mise en place du SOC** : plateforme Elastic Security sécurisée, collecte et normalisation ECS, spécifications | 🟡 En cours |
-| 2 | **Ingénierie de détection** : règles Sigma, conversion, mapping MITRE ATT&CK | ⚪ À venir |
+| [1](module1/) | **Mise en place du SOC** : plateforme Elastic Security sécurisée, collecte et normalisation ECS, spécifications | ✅ Terminé |
+| [2](module2/) | **Ingénierie de détection** : 5 règles Sigma testées sur de vraies attaques, couverture MITRE ATT&CK | ✅ Terminé |
 | 3 | **Purple team et corrélation** : Atomic Red Team, règles de séquence EQL | ⚪ À venir |
 | 4 | **Tuning et exclusions** : faux positifs, exceptions justifiées, mesure du bruit | ⚪ À venir |
 | 5 | **Traitement des incidents** : procédures par alerte, deux enquêtes complètes | ⚪ À venir |
