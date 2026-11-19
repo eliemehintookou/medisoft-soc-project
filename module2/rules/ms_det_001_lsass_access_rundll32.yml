@@ -1,0 +1,26 @@
+title: Accès mémoire à LSASS par rundll32 (dump via comsvcs.dll)
+id: 1255ba5b-e300-4c1c-9a87-188203279922
+status: experimental
+description: >
+  Détecte rundll32.exe qui ouvre le processus lsass.exe. Les attaquants
+  détournent la DLL légitime comsvcs.dll (fonction MiniDump) pour copier
+  la mémoire de LSASS et en extraire les identifiants.
+references:
+  - https://attack.mitre.org/techniques/T1003/001/
+author: Elie MEHINTO
+date: 2026-11-19
+tags:
+  - attack.credential-access
+  - attack.t1003.001
+logsource:
+  product: windows
+  category: process_access
+detection:
+  selection_cible:
+    TargetImage|endswith: '\lsass.exe'
+  selection_source:
+    SourceImage|endswith: '\rundll32.exe'
+  condition: selection_cible and selection_source
+falsepositives:
+  - Très rares ; rundll32 n'a pas de raison légitime d'accéder à LSASS
+level: critical

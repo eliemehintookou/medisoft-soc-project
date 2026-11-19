@@ -1,0 +1,9 @@
+name: MediSoft ECS (sans sous-champs caseless)
+priority: 30
+transformations:
+  - id: medisoft_sans_caseless
+    type: field_name_mapping
+    mapping:
+      process.executable.caseless: process.executable
+      process.parent.executable.caseless: process.parent.executable
+      process.parent.name.caseless: process.parent.name
