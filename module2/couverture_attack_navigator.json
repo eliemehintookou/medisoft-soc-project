@@ -1,0 +1,101 @@
+{
+  "name": "SOC MediSoft - Couverture de détection (module 2)",
+  "versions": {
+    "layer": "4.5",
+    "navigator": "5.1.0"
+  },
+  "domain": "enterprise-attack",
+  "description": "Techniques couvertes par les règles Sigma MS-DET-001 à MS-DET-005, testées sur des attaques réelles (OTRF Security-Datasets).",
+  "techniques": [
+    {
+      "techniqueID": "T1003.001",
+      "color": "#e74c3c",
+      "score": 100,
+      "comment": "MS-DET-001 Dump LSASS via comsvcs.dll"
+    },
+    {
+      "techniqueID": "T1059.001",
+      "color": "#e67e22",
+      "score": 75,
+      "comment": "MS-DET-002 PowerShell encodé"
+    },
+    {
+      "techniqueID": "T1027",
+      "color": "#e67e22",
+      "score": 75,
+      "comment": "MS-DET-002 Commande encodée en Base64"
+    },
+    {
+      "techniqueID": "T1059.005",
+      "color": "#e67e22",
+      "score": 75,
+      "comment": "MS-DET-003 wscript lance PowerShell"
+    },
+    {
+      "techniqueID": "T1204.002",
+      "color": "#e67e22",
+      "score": 75,
+      "comment": "MS-DET-003 Pièce jointe .vbs ouverte"
+    },
+    {
+      "techniqueID": "T1053.005",
+      "color": "#e67e22",
+      "score": 75,
+      "comment": "MS-DET-004 Tâche planifiée de persistance"
+    },
+    {
+      "techniqueID": "T1003.003",
+      "color": "#e67e22",
+      "score": 75,
+      "comment": "MS-DET-005 Cliché instantané pour copier NTDS.dit"
+    },
+    {
+      "techniqueID": "T1003.002",
+      "color": "#e67e22",
+      "score": 75,
+      "comment": "MS-DET-005 Sauvegarde de la ruche SYSTEM"
+    },
+    {
+      "techniqueID": "T1003",
+      "color": "#f5b7b1",
+      "score": 50,
+      "comment": "Credential Dumping : MS-DET-001, MS-DET-005"
+    },
+    {
+      "techniqueID": "T1059",
+      "color": "#f5b7b1",
+      "score": 50,
+      "comment": "Command and Scripting Interpreter : MS-DET-002, MS-DET-003"
+    },
+    {
+      "techniqueID": "T1204",
+      "color": "#f5b7b1",
+      "score": 50,
+      "comment": "User Execution : MS-DET-003"
+    },
+    {
+      "techniqueID": "T1053",
+      "color": "#f5b7b1",
+      "score": 50,
+      "comment": "Scheduled Task/Job : MS-DET-004"
+    }
+  ],
+  "legendItems": [
+    {
+      "label": "Critical",
+      "color": "#e74c3c"
+    },
+    {
+      "label": "High",
+      "color": "#e67e22"
+    }
+  ],
+  "showTacticRowBackground": true,
+  "selectTechniquesAcrossTactics": true,
+  "layout": {
+    "layout": "side",
+    "showName": true,
+    "showID": true,
+    "expandedSubtechniques": "annotated"
+  }
+}

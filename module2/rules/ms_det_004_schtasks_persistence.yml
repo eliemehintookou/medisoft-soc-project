@@ -1,0 +1,38 @@
+title: Création d'une tâche planifiée qui lance une commande suspecte
+id: ccbd01fa-7cca-452e-87bb-9eb0c1a38f08
+status: experimental
+description: >
+  Détecte schtasks.exe utilisé pour créer une tâche qui lance PowerShell, cmd,
+  un moteur de script, rundll32 ou un exécutable situé dans AppData ou Temp.
+  Technique de persistance courante après une compromission.
+references:
+  - https://attack.mitre.org/techniques/T1053/005/
+author: Elie MEHINTO
+date: 2026-11-19
+tags:
+  - attack.persistence
+  - attack.execution
+  - attack.t1053.005
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_schtasks:
+    Image|endswith: '\schtasks.exe'
+    CommandLine|contains|windash:
+      - ' -create '
+      - ' -Create '
+  selection_charge:
+    CommandLine|contains:
+      - 'powershell'
+      - 'cmd.exe /c'
+      - 'cmd /c'
+      - 'mshta'
+      - 'wscript'
+      - 'rundll32'
+      - '\AppData\'
+      - '\Temp\'
+  condition: selection_schtasks and selection_charge
+falsepositives:
+  - Logiciels de mise à jour ou scripts d'administration qui créent des tâches PowerShell (à recenser au module 4)
+level: high

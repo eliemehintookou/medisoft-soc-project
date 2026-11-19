@@ -1,0 +1,1 @@
+(process.parent.executable:(*\\wscript.exe OR *\\cscript.exe OR *\\mshta.exe)) AND (process.executable:(*\\powershell.exe OR *\\pwsh.exe OR *\\cmd.exe))

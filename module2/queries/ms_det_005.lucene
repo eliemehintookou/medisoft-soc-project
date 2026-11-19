@@ -1,0 +1,1 @@
+(process.executable:*\\vssadmin.exe AND process.command_line:*create\ shadow*) OR ((process.executable:*\\reg.exe AND process.command_line:*\ save\ *) AND (process.command_line:(*\\SYSTEM* OR *\\SAM* OR *\\SECURITY* OR *\\system* OR *\\sam* OR *\\security*)))

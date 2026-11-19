@@ -1,0 +1,32 @@
+title: PowerShell lancé avec une commande encodée
+id: cce5c083-5898-4ef3-a260-2862cda62efe
+status: experimental
+description: >
+  Détecte powershell.exe ou pwsh.exe lancé avec le paramètre -EncodedCommand
+  (ou ses abréviations), souvent utilisé pour cacher une commande malveillante.
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+author: Elie MEHINTO
+date: 2026-11-19
+tags:
+  - attack.execution
+  - attack.t1059.001
+  - attack.stealth
+  - attack.t1027
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_image:
+    Image|endswith:
+      - '\powershell.exe'
+      - '\pwsh.exe'
+  selection_encode:
+    CommandLine|contains|windash:
+      - ' -enc '
+      - ' -encodedcommand '
+      - ' -ec '
+  condition: selection_image and selection_encode
+falsepositives:
+  - Scripts d'administration légitimes utilisant -EncodedCommand (à identifier et exclure au module 4)
+level: high

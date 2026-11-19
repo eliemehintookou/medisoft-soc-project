@@ -62,16 +62,17 @@ Ils viennent des risques identifiés dans l'analyse EBIOS RM et des quatre playb
 
 | ID | Cas d'usage | Tactique MITRE ATT&CK | Playbook GRC lié | Module |
 |---|---|---|---|---|
-| UC-01 | Exécution PowerShell obfusquée ou encodée | Execution (T1059.001), Defense Evasion (T1027) | Phishing | 2 |
-| UC-02 | Document Office qui lance un interpréteur de commandes | Initial Access (T1566.001) | Phishing | 2 |
+| UC-01 | Exécution PowerShell obfusquée ou encodée | Execution (T1059.001), Stealth (T1027) | Phishing | 2 |
+| UC-02 | Fichier script (pièce jointe) qui lance un interpréteur de commandes | Execution (T1059.005, T1204.002) | Phishing | 2 |
 | UC-03 | Accès mémoire à LSASS (vol d'identifiants) | Credential Access (T1003.001) | Compromission de compte | 2 |
 | UC-04 | Persistance par tâche planifiée ou service | Persistence (T1053.005, T1543.003) | Rançongiciel | 2 |
 | UC-05 | Brute force suivi d'une connexion réussie | Credential Access (T1110) | Compromission de compte | 3 (corrélation) |
 | UC-06 | Kerberoasting | Credential Access (T1558.003) | Compromission de compte | 3 |
 | UC-07 | Mouvement latéral (PsExec, WMI) | Lateral Movement (T1021.002, T1047) | Rançongiciel | 3 |
-| UC-08 | Suppression des sauvegardes / clichés instantanés | Impact (T1490) | Rançongiciel | 2 |
+| UC-08 | Suppression des sauvegardes / clichés instantanés | Impact (T1490) | Rançongiciel | 3 (test en direct) |
 | UC-09 | Clé d'accès AWS utilisée depuis une IP inhabituelle | Initial Access (T1078.004) | Compromission de compte | 6 |
-| UC-10 | Bucket S3 rendu public ou CloudTrail désactivé | Exfiltration (T1537), Defense Evasion (T1562.008) | Fuite de données | 6 |
+| UC-11 | Vol de la base Active Directory (NTDS.dit, ruches SYSTEM/SAM) | Credential Access (T1003.003, T1003.002) | Compromission de compte | 2 |
+| UC-10 | Bucket S3 rendu public ou CloudTrail désactivé | Exfiltration (T1537), Defense Impairment (T1562.008) | Fuite de données | 6 |
 
 ## 7. Rôles et responsabilités (RACI)
 
@@ -103,7 +104,7 @@ R = réalise, A = approuve et rend des comptes, C = consulté, I = informé.
 | Module | Contenu |
 |---|---|
 | 1 | Mise en place de la plateforme, collecte et normalisation, spécifications (ce document) |
-| 2 | Ingénierie de détection : règles Sigma, conversion, mapping MITRE (UC-01 à UC-04, UC-08) |
+| 2 | Ingénierie de détection : règles Sigma, conversion, mapping MITRE (UC-01 à UC-04, UC-11) |
 | 3 | Purple team et corrélation : Atomic Red Team, règles de séquence (UC-05 à UC-07) |
 | 4 | Tuning : faux positifs, exclusions justifiées, mesure du bruit |
 | 5 | Procédures de traitement des alertes et deux enquêtes complètes |
@@ -115,3 +116,6 @@ R = réalise, A = approuve et rend des comptes, C = consulté, I = informé.
 - Plateforme mono-nœud, pas de haute disponibilité.
 - Les postes sont représentés par des jeux de données réels rejoués (OTRF Security-Datasets) et par des tests en direct, pas par 85 machines.
 - Elastic Security remplace un SIEM ou XDR commercial. Les principes (normalisation, règles, exceptions, cas) sont les mêmes que dans les outils du marché, mais les produits eux-mêmes n'ont pas été pratiqués.
+
+
+> **Mise à jour du 19 novembre 2026.** Le référentiel MITRE ATT&CK a remplacé la tactique Defense Evasion par deux tactiques, Stealth (TA0005) et Defense Impairment (TA0112). Les cas d'usage ont été re-tagués en conséquence.
